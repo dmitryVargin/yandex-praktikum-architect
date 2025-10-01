@@ -1,0 +1,48 @@
+@startuml
+!define table(name, desc) class name as "== name\n--\n desc"
+hide methods
+hide stereotypes
+
+' -----------------------------------------------------
+' 1. Определение Сущностей (Таблиц)
+' -----------------------------------------------------
+
+entity House {
+    * id : UUID <<PK>>
+    --
+    address : VARCHAR(255)
+    city : VARCHAR(100)
+    created_at : TIMESTAMP
+}
+
+entity Room {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR(100)
+    * house_id : UUID <<FK>>
+    floor : INTEGER
+}
+
+entity Sensor {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR(100)
+    * room_id : UUID <<FK>>
+    sensor_type : VARCHAR(50)
+    is_active : BOOLEAN
+    last_reading_at : TIMESTAMP
+}
+
+' -----------------------------------------------------
+' 2. Отношения (Relationship)
+' -----------------------------------------------------
+
+' Отношение 1: Дом и Комната (One-to-Many)
+' Дом может иметь много комнат, но комната принадлежит только одному дому.
+House "1" -- "0..*" Room : содержит
+
+' Отношение 2: Комната и Датчик (One-to-Many)
+' Комната может иметь много датчиков, но датчик установлен только в одной комнате.
+Room "1" -- "0..*" Sensor : содержит
+
+@enduml

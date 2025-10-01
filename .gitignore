@@ -1,1 +1,45 @@
 .DS_Store
+.idea
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+coverage/
+.tmp/
+.tmp-*/
+
+# NestJS
+.nestcli.json
+# compiled ts
+*.tsbuildinfo
+
+# Env
+.env
+.env.*
+!.env.example
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs
+logs/
+*.log
+*.log.*
+lerna-debug.log
+
+# Docker
+docker/*.log
+docker/**/data

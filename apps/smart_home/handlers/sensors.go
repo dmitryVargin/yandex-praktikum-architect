@@ -10,6 +10,7 @@ import (
 	"smarthome/db"
 	"smarthome/models"
 	"smarthome/services"
+	"smarthome/events"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,13 +19,15 @@ import (
 type SensorHandler struct {
 	DB                 *db.DB
 	TemperatureService *services.TemperatureService
+	EventPublisher     events.Publisher
 }
 
 // NewSensorHandler creates a new SensorHandler
-func NewSensorHandler(db *db.DB, temperatureService *services.TemperatureService) *SensorHandler {
+func NewSensorHandler(db *db.DB, temperatureService *services.TemperatureService, publisher events.Publisher) *SensorHandler {
 	return &SensorHandler{
 		DB:                 db,
 		TemperatureService: temperatureService,
+		EventPublisher:     publisher,
 	}
 }
 
@@ -142,6 +145,8 @@ func (h *SensorHandler) CreateSensor(c *gin.Context) {
 		return
 	}
 
+	// Publish Kafka event
+	_ = h.EventPublisher.Publish(c.Request.Context(), "sensor.created", sensor)
 	c.JSON(http.StatusCreated, sensor)
 }
 
@@ -165,6 +170,19 @@ func (h *SensorHandler) UpdateSensor(c *gin.Context) {
 		return
 	}
 
+	// Publish Kafka event
+	_ = h.EventPublisher.Publish(c.Request.Context(), "sensor.updated", map[string]any{
+		"id":      sensor.ID,
+		"name":    sensor.Name,
+		"type":    sensor.Type,
+		"value":   sensor.Value,
+		"status":  sensor.Status,
+		"unit":    sensor.Unit,
+// 		"room":    sensor.Room,
+		"created": sensor.CreatedAt,
+// 		"updated": sensor.UpdatedAt,
+	})
+
 	c.JSON(http.StatusOK, sensor)
 }
 
@@ -181,6 +199,9 @@ func (h *SensorHandler) DeleteSensor(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Publish Kafka event
+	_ = h.EventPublisher.Publish(c.Request.Context(), "sensor.deleted", map[string]any{"id": id})
 
 	c.JSON(http.StatusOK, gin.H{"message": "Sensor deleted successfully"})
 }
@@ -208,6 +229,13 @@ func (h *SensorHandler) UpdateSensorValue(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Publish Kafka event
+	_ = h.EventPublisher.Publish(c.Request.Context(), "sensor.value_updated", map[string]any{
+		"id":     id,
+		"value":  request.Value,
+		"status": request.Status,
+	})
 
 	c.JSON(http.StatusOK, gin.H{"message": "Sensor value updated successfully"})
 }

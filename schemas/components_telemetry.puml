@@ -1,0 +1,39 @@
+@startuml components_telemetry
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 - Components: telemetry-service
+
+Person_Ext(consumer, "External Client", "Клиент, вызывающий REST эндпоинты чтений")
+System_Ext(kafka, "Kafka", "Шина событий sensor.events")
+System_Ext(tempApi, "temperature-api", "Сервис, отдающий температуру")
+SystemDb_Ext(mongo, "MongoDB", "telemetry_readings коллекция")
+
+Container_Boundary(telemetry, "telemetry-service (NestJS)") {
+  Component(controller, "TelemetryController", "NestJS Controller", "REST API /readings: POST create, GET find")
+  Component(service, "TelemetryService", "Application Service", "Создание/поиск показаний телеметрии")
+  Component(poller, "TemperaturePollerService", "Background Job", "Периодический опрос temperature-api и запись показаний")
+  Component(kafkaCtrl, "KafkaController", "Message Consumer", "Прием событий из Kafka (sensor.events)")
+  ComponentDb(mongooseModel, "TelemetryReading Model", "Mongoose Model", "Схема/модель TelemetryReading")
+  Component(initProvider, "TelemetryInitializer", "Provider", "Инициализация коллекции и индексов (при старте)")
+}
+
+Rel(consumer, controller, "HTTP", "JSON")
+Rel(controller, service, "calls")
+Rel(poller, tempApi, "HTTP GET /temperature/{sensorId}", "JSON")
+Rel(poller, service, "creates readings")
+Rel(kafka, kafkaCtrl, "consumes events sensor.events")
+Rel(kafkaCtrl, service, "creates readings from events")
+
+Rel(service, mongooseModel, "uses")
+Rel_R(mongooseModel, mongo, "CRUD", "sensorId, timestamp, value, unit")
+
+Rel_D(initProvider, mongo, "ensure collection/index")
+
+' Доп. связи среды выполнения
+Rel_D(telemetry, kafka, "produce/consume via KAFKA_BROKERS", "PLAINTEXT")
+Rel_D(telemetry, mongo, "MONGO_URI", "TCP 27017")
+
+SHOW_LEGEND()
+@enduml

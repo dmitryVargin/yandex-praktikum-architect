@@ -1,0 +1,157 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sensors Service API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/sensors": {
+      "post": {
+        "summary": "Create sensor",
+        "operationId": "createSensor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateSensorDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Sensor" } }
+            }
+          },
+          "400": { "description": "Bad Request" }
+        }
+      },
+      "get": {
+        "summary": "List sensors",
+        "operationId": "listSensors",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Sensor" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sensors/{id}": {
+      "get": {
+        "summary": "Get sensor by ID",
+        "operationId": "getSensor",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Sensor" } }
+            }
+          },
+          "404": { "description": "Not Found" }
+        }
+      },
+      "patch": {
+        "summary": "Update sensor",
+        "operationId": "updateSensor",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateSensorDto" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Sensor" } }
+            }
+          },
+          "404": { "description": "Not Found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete sensor",
+        "operationId": "deleteSensor",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "204": { "description": "No Content" },
+          "404": { "description": "Not Found" }
+        }
+      }
+    },
+    "/sensors/{id}/toggle-enabled": {
+      "patch": {
+        "summary": "Toggle sensor enabled flag",
+        "operationId": "toggleSensorEnabled",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Sensor" } }
+            }
+          },
+          "404": { "description": "Not Found" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Sensor": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["temperature"] },
+          "location": { "type": "string" },
+          "unit": { "type": "string", "nullable": true },
+          "status": { "type": "string", "example": "unknown" },
+          "value": { "type": "number", "example": 0 },
+          "isEnabled": { "type": "boolean" },
+          "lastUpdated": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "name", "type", "location", "status", "isEnabled", "lastUpdated", "createdAt"]
+      },
+      "CreateSensorDto": {
+        "type": "object",
+        "required": ["name", "type", "location"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["temperature"] },
+          "location": { "type": "string" },
+          "unit": { "type": "string", "nullable": true }
+        }
+      },
+      "UpdateSensorDto": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["temperature"] },
+          "location": { "type": "string" },
+          "unit": { "type": "string", "nullable": true },
+          "status": { "type": "string" },
+          "value": { "type": "number" },
+          "isEnabled": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

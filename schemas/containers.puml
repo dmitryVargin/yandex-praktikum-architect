@@ -1,0 +1,46 @@
+@startuml
+!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Диаграмма контейнеров системы «Тёплый дом»
+
+Person(user, "Клиент", "Пользователь, взаимодействующий с системой")
+System_Ext(heating_system, 'Система отопления', 'Датчики и устройства управления')
+
+System_Boundary(microservices_system, "Система «Тёплый дом»") {
+
+     Container(web_app, "Веб-приложение", "React SPA / Nginx", "Предоставляет пользовательский интерфейс.")
+
+    Container(service_sensors, "Сервис адресов и датчиков", "Node.js", "CRUD домов/комнат/датчиков")
+    Container(service_telemetry, "Сервис телеметрии", "Node.js", "CRUD аналитических данных")
+    Container(service_device_control, "Сервис управления устройствами", "Node.js", "Статус и состояние устройств")
+
+    ContainerDb(db_sensors, "База локаций и датчиков", "PostgreSQL", "Хранит данные адресов и датчиков")
+    ContainerDb(db_telemetry, "База телеметрии", "MongoDB", "Хранит аналитические данные")
+    ContainerDb(db_device_control, "База управления устройствами", "MongoDB", "Хранит состояния устройств")
+
+    SystemQueue(kafka, "Kafka Cluster", "Apache Kafka", "Брокер сообщений для асинхронной связи")
+
+    Rel(web_app, service_sensors, "Чтение/Запись","REST/HTTPS")
+    Rel(web_app, service_telemetry, "Чтение/Запись","REST/HTTPS")
+    Rel(web_app, service_device_control, "Чтение/Запись","REST/HTTPS")
+
+    Rel(service_sensors, db_sensors, "Чтение/Запись","JDBC/SQL")
+    Rel(service_telemetry, db_telemetry, "Чтение/Запись","MongoDB Driver")
+    Rel(service_device_control, db_device_control, "Чтение/Запись","MongoDB Driver")
+
+
+    Rel(service_sensors, kafka, "Публикует: SensorDataUpdated", "ASYNCH: Kafka")
+    Rel(kafka, service_telemetry, "Потребляет: SensorDataUpdated", "ASYNCH: Kafka",)
+    Rel(kafka, service_device_control, "Потребляет: SensorDataUpdated", "ASYNCH: Kafka")
+
+
+    Rel(service_telemetry, heating_system, "Получение данных", HTTP)
+    Rel(service_device_control, heating_system, "Управление устройствами", HTTP)
+
+
+}
+
+
+Rel(user, web_app, "Использует", "HTTPS")
+
+@enduml
