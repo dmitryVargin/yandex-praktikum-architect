@@ -1,0 +1,67 @@
+@startuml
+title Sensors Service - Code Level (C4 Level 4)
+
+
+    class SensorsController {
+        +create(dto: CreateSensorDto): Promise
+        +findAll(): Promise
+        +findOne(id: number): Promise
+        +update(id: number, dto: UpdateSensorDto): Promise
+        +toggleEnabled(id: number): Promise
+        +remove(id: number): Promise
+    }
+
+
+
+    class SensorsService {
+        +create(dto: CreateSensorDto): Promise
+        +findAll(): Promise
+        +findOne(id: number): Promise
+        +update(id: number, dto: UpdateSensorDto): Promise
+        +toggleEnabled(id: number): Promise
+        +remove(id: number): Promise
+    }
+
+    class Sensor {
+        -id: number
+        -name: string
+        -type: SensorType
+        -location: string
+        -isEnabled: boolean
+        -value: number
+        -createdAt: Date
+        -updatedAt: Date
+    }
+
+
+
+    class CreateSensorDto {
+        +name: string
+        +type: SensorType
+        +location: string
+        +isEnabled?: boolean
+        +value?: number
+    }
+
+    class UpdateSensorDto {
+        +name?: string
+        +type?: SensorType
+        +location?: string
+        +isEnabled?: boolean
+        +value?: number
+    }
+
+    enum SensorType {
+        TEMPERATURE
+    }
+
+
+SensorsController --> SensorsService
+SensorsService --> Sensor
+SensorsController --> CreateSensorDto
+SensorsController --> UpdateSensorDto
+CreateSensorDto --> SensorType
+UpdateSensorDto --> SensorType
+Sensor --> SensorType
+
+@enduml

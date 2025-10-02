@@ -1,0 +1,54 @@
+@startuml
+title Sensors & Telemetry – ER Diagram (Project)
+
+entity SensorType {
+  * uid : UUID <<PK>>
+  --
+  code : varchar
+  name : varchar
+  description : varchar
+}
+
+entity Sensor {
+  * uid : UUID <<PK>>
+  --
+  type_id : UUID <<FK>>   ' -> SensorType
+  serial_number : varchar
+  model : varchar
+  name : varchar
+  description : varchar
+  status : varchar
+  unit : varchar
+  value : float
+  is_enabled : boolean
+  registered_at : datetime
+  last_seen : datetime
+}
+
+entity TelemetryData {
+  * id : UUID <<PK>>
+  --
+  sensor_id : UUID <<FK>>
+  metric : varchar
+  value : float
+  unit : varchar
+  timestamp : datetime
+  received_at : datetime
+}
+
+entity Control {
+  * id : UUID <<PK>>
+  --
+  sensor_id : UUID <<FK>>
+  type : varchar
+  payload : json
+  status : varchar
+  created_at : datetime
+  executed_at : datetime
+}
+
+SensorType ||--o{ Sensor : classifies
+Sensor ||--o{ TelemetryData : sends
+Sensor ||--o{ Control : receives
+
+@enduml
