@@ -1,0 +1,82 @@
+@startuml
+title Sensors & Telemetry – ER Diagram (Project)
+
+
+entity User {
+  * uid : UUID <<PK>>
+  --
+  email : varchar
+  first_name : varchar
+  last_name : varchar
+  password_hash : varchar
+}
+
+entity Home {
+  * uid : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  name : varchar
+  location : varchar
+}
+
+entity Room {
+  * uid : UUID <<PK>>
+  --
+  home_id : UUID <<FK>>
+  name : varchar
+}
+
+entity SensorType {
+  * uid : UUID <<PK>>
+  --
+  code : varchar
+  name : varchar
+  description : varchar
+}
+
+entity Sensor {
+  * uid : UUID <<PK>>
+  --
+  type_id : UUID <<FK>>   ' -> SensorType
+  serial_number : varchar
+  model : varchar
+  name : varchar
+  description : varchar
+  status : varchar
+  unit : varchar
+  value : float
+  is_enabled : boolean
+  registered_at : datetime
+  last_seen : datetime
+}
+
+entity TelemetryData {
+  * id : UUID <<PK>>
+  --
+  sensor_id : UUID <<FK>>
+  metric : varchar
+  value : float
+  unit : varchar
+  timestamp : datetime
+  received_at : datetime
+}
+
+entity Control {
+  * id : UUID <<PK>>
+  --
+  sensor_id : UUID <<FK>>
+  type : varchar
+  payload : json
+  status : varchar
+  created_at : datetime
+  executed_at : datetime
+}
+
+User ||--o{ Home : owns
+Home ||--o{ Room : has
+Room ||--o{ Sensor : has
+SensorType ||--o{ Sensor : classifies
+Sensor ||--o{ TelemetryData : sends
+Sensor ||--o{ Control : receives
+
+@enduml

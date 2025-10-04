@@ -1,0 +1,28 @@
+@startuml components_sensors
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 - Components: sensors-service
+
+Person_Ext(client, "External Client", "Клиент, вызывающий REST API /sensors")
+System_Ext(kafka, "Kafka", "Шина событий sensor.events")
+SystemDb_Ext(pg, "PostgreSQL", "База данных sensors-service-db (таблица sensors)")
+
+Container_Boundary(sensorsSvc, "sensors-service (NestJS + TypeORM)") {
+  Component(sensorsController, "SensorsController", "NestJS Controller", "REST API: CRUD над сенсорами, toggle enabled")
+  Component(sensorsService, "SensorsService", "Application Service", "Бизнес-логика CRUD, toggleEnabled")
+  ComponentDb(typeormRepo, "TypeORM Repository<Sensor>", "TypeORM", "Репозиторий сущности Sensor")
+  Component(sensorEntity, "Sensor Entity", "TypeORM Entity", "id, name, type, location, unit, status, value, isEnabled, lastUpdated, createdAt")
+}
+
+Rel(client, sensorsController, "HTTP", "JSON")
+Rel(sensorsController, sensorsService, "calls")
+Rel(sensorsService, typeormRepo, "uses")
+Rel_D(typeormRepo, pg, "CRUD", "SQL / TCP 5432")
+
+' Возможная интеграция по событиям (если добавите продюсинг/консюминг)
+Rel_D(sensorsSvc, kafka, "produce/consume", "topic sensor.events")
+
+SHOW_LEGEND()
+@enduml

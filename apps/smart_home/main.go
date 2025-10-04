@@ -12,13 +12,14 @@ import (
 	"smarthome/db"
 	"smarthome/handlers"
 	"smarthome/services"
+	"smarthome/events"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	// Set up database connection
-	dbURL := getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/smarthome")
+	dbURL := getEnv("DATABASE_URL", "postgres://smarthome_admin:my_super_secure_password_123@localhost:5432/smarthome")
 	database, err := db.New(dbURL)
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
@@ -45,8 +46,18 @@ func main() {
 	// API routes
 	apiRoutes := router.Group("/api/v1")
 
+	// Initialize Kafka publisher
+	kafkaBrokers := getEnv("KAFKA_BROKERS", "kafka:9092")
+	kafkaTopic := getEnv("KAFKA_TOPIC", "sensor.events")
+	publisher := events.NewKafkaPublisher(kafkaBrokers, kafkaTopic)
+	defer func() {
+		if err := publisher.Close(); err != nil {
+			log.Printf("Failed to close Kafka publisher: %v\n", err)
+		}
+	}()
+
 	// Register sensor routes
-	sensorHandler := handlers.NewSensorHandler(database, temperatureService)
+	sensorHandler := handlers.NewSensorHandler(database, temperatureService, publisher)
 	sensorHandler.RegisterRoutes(apiRoutes)
 
 	// Start server

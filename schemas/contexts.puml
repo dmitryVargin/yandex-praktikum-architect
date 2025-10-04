@@ -1,0 +1,26 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Диаграмма контекста системы «Тёплый дом»
+
+Person(user, "Пользователь", "Получает данные и управляет устройствами")
+Person(installer, "Установщик", "Устанавливает и настраивает систему отопления")
+
+System(app, "Монолитное приложение «Тёплый дом»", "Go + PostgreSQL")
+System_Ext(heating_system, 'Система отопления', 'Датчики и устройства управления')
+
+
+
+Rel(user, app, "Управляет отоплением и получает данные о температуре")
+Rel(installer, app, "Регистрирует новые устройства и выполняет их первоначальную настройку")
+Rel(app, heating_system, "Запрашивает данные и управляет устройствами","HTTP")
+Rel(heating_system, app, 'Датчики регистрируются при включении',"HTTP")
+Rel(installer, heating_system, "Проводит физическую установку для подключения к системе")
+
+note bottom of heating_system
+Существует множество экземпляров системы:
+в каждой локации установлена своя.
+end note
+
+@enduml
