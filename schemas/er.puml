@@ -1,6 +1,31 @@
 @startuml
 title Sensors & Telemetry – ER Diagram (Project)
 
+
+entity User {
+  * uid : UUID <<PK>>
+  --
+  email : varchar
+  first_name : varchar
+  last_name : varchar
+  password_hash : varchar
+}
+
+entity Home {
+  * uid : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  name : varchar
+  location : varchar
+}
+
+entity Room {
+  * uid : UUID <<PK>>
+  --
+  home_id : UUID <<FK>>
+  name : varchar
+}
+
 entity SensorType {
   * uid : UUID <<PK>>
   --
@@ -47,6 +72,9 @@ entity Control {
   executed_at : datetime
 }
 
+User ||--o{ Home : owns
+Home ||--o{ Room : has
+Room ||--o{ Sensor : has
 SensorType ||--o{ Sensor : classifies
 Sensor ||--o{ TelemetryData : sends
 Sensor ||--o{ Control : receives
