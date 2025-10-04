@@ -3,9 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn
 } from 'typeorm';
 import { SensorType } from './dto/sensor-type.enum';
+import { Room } from '../rooms/room.entity';
 
 @Entity({ name: 'sensors' })
 export class Sensor {
@@ -32,6 +35,13 @@ export class Sensor {
 
   @Column({ type: 'varchar', length: 50, default: 'unknown' })
   status!: string;
+
+  @Column({ type: 'uuid', name: 'room_id', nullable: true })
+  roomId!: string | null;
+
+  @ManyToOne(() => Room, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'room_id', referencedColumnName: 'uid' })
+  room?: Room | null;
 
   @UpdateDateColumn({ type: 'timestamptz', name: 'last_updated' })
   lastUpdated!: Date;

@@ -1,4 +1,4 @@
-import {IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString} from 'class-validator';
+import {IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID} from 'class-validator';
 import { SensorType } from './sensor-type.enum';
 
 export class CreateSensorDto {
@@ -20,4 +20,8 @@ export class CreateSensorDto {
   @IsString()
   @IsOptional()
   unit?: string;
+
+  @IsUUID()
+  @IsOptional()
+  roomId?: string;
 }
